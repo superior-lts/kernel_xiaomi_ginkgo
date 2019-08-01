@@ -43,7 +43,6 @@ static struct kmem_cache *ion_page_info_pool;
 bool pool_auto_refill_en  __read_mostly =
 		IS_ENABLED(CONFIG_ION_POOL_AUTO_REFILL);
 
-
 int order_to_index(unsigned int order)
 {
 	int i;
@@ -796,7 +795,9 @@ destroy_secure_pools:
 	kfree(heap);
 destroy_page_info_pool:
 	kmem_cache_destroy(ion_page_info_pool);
+
 	return ERR_PTR(ret);
+
 }
 
 static int ion_system_contig_heap_allocate(struct ion_heap *heap,
