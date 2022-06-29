@@ -83,16 +83,12 @@ typedef uintptr_t uptrval;
 #define MINMATCH 4
 
 #define WILDCOPYLENGTH 8
-#define LASTLITERALS 5
-#define MFLIMIT (WILDCOPYLENGTH + MINMATCH)
-/*
- * ensure it's possible to write 2 x wildcopyLength
- * without overflowing output buffer
- */
-#define MATCH_SAFEGUARD_DISTANCE  ((2 * WILDCOPYLENGTH) - MINMATCH)
-
-/* Increase this value ==> compression run slower on incompressible data */
-#define LZ4_SKIPTRIGGER 6
+#define LASTLITERALS 5 /* see ../doc/lz4_Block_format.md#parsing-restrictions */
+#define MFLIMIT 12 /* see ../doc/lz4_Block_format.md#parsing-restrictions */
+#define MATCH_SAFEGUARD_DISTANCE \
+	((2 * WILDCOPYLENGTH) -  \
+	 MINMATCH) /* ensure it's possible to write 2 x wildcopyLength without overflowing output buffer */
+#define FASTLOOP_SAFE_DISTANCE 64
 
 #define HASH_UNIT sizeof(size_t)
 
@@ -162,27 +158,9 @@ static FORCE_INLINE void LZ4_writeLE16(void *memPtr, U16 value)
 #define LZ4_memcpy(dst, src, size) __builtin_memcpy(dst, src, size)
 #define LZ4_memmove(dst, src, size) __builtin_memmove(dst, src, size)
 
-static FORCE_INLINE void LZ4_copy8(void *dst, const void *src)
-{
-#if LZ4_ARCH64
-	U64 a = get_unaligned((const U64 *)src);
-
-	put_unaligned(a, (U64 *)dst);
-#else
-	U32 a = get_unaligned((const U32 *)src);
-	U32 b = get_unaligned((const U32 *)src + 1);
-
-	put_unaligned(a, (U32 *)dst);
-	put_unaligned(b, (U32 *)dst + 1);
-#endif
-}
-
-/*
- * customized variant of memcpy,
- * which can overwrite up to 7 bytes beyond dstEnd
- */
-static FORCE_INLINE void LZ4_wildCopy(void *dstPtr,
-	const void *srcPtr, void *dstEnd)
+/* customized variant of memcpy, which can overwrite up to 8 bytes beyond dstEnd */
+static FORCE_INLINE void LZ4_wildCopy8(void *dstPtr, const void *srcPtr,
+				       void *dstEnd)
 {
 	BYTE *d = (BYTE *)dstPtr;
 	const BYTE *s = (const BYTE *)srcPtr;
@@ -244,15 +222,24 @@ static FORCE_INLINE unsigned int LZ4_count(const BYTE *pIn, const BYTE *pMatch,
 	return (unsigned)(pIn - pStart);
 }
 
-typedef enum { noLimit = 0, limitedOutput = 1 } limitedOutput_directive;
-typedef enum { byPtr, byU32, byU16 } tableType_t;
+typedef enum {
+	notLimited = 0,
+	limitedOutput = 1,
+	fillOutput = 2
+} limitedOutput_directive;
+typedef enum { clearedTable = 0, byPtr, byU32, byU16 } tableType_t;
 
-typedef enum { noDict = 0, withPrefix64k, usingExtDict } dict_directive;
+typedef enum {
+	noDict = 0,
+	withPrefix64k,
+	usingExtDict,
+	usingDictCtx
+} dict_directive;
 typedef enum { noDictIssue = 0, dictSmall } dictIssue_directive;
 
 typedef enum { endOnOutputSize = 0, endOnInputSize = 1 } endCondition_directive;
 typedef enum { decode_full_block = 0, partial_decode = 1 } earlyEnd_directive;
 
-#define LZ4_STATIC_ASSERT(c)	BUILD_BUG_ON(!(c))
+#define LZ4_STATIC_ASSERT(c) BUILD_BUG_ON(!(c))
 
 #endif
