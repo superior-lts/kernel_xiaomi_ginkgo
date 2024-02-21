@@ -661,8 +661,6 @@ static void fill_random_ptr_key(struct random_ready_callback *unused)
 	queue_work(system_unbound_wq, &enable_ptr_key_work);
 }
 
-early_initcall(initialize_ptr_random);
-
 /* Maps a pointer to a 32 bit unique identifier. */
 static char *ptr_to_id(char *buf, char *end, const void *ptr,
 		       struct printf_spec spec)
