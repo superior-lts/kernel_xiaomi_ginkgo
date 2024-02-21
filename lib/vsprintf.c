@@ -661,24 +661,6 @@ static void fill_random_ptr_key(struct random_ready_callback *unused)
 	queue_work(system_unbound_wq, &enable_ptr_key_work);
 }
 
-static struct random_ready_callback random_ready = {
-	.func = fill_random_ptr_key
-};
-
-static int __init initialize_ptr_random(void)
-{
-	int ret = add_random_ready_callback(&random_ready);
-
-	if (!ret) {
-		return 0;
-	} else if (ret == -EALREADY) {
-		/* This is in preemptible context */
-		enable_ptr_key_workfn(&enable_ptr_key_work);
-		return 0;
-	}
-
-	return ret;
-}
 early_initcall(initialize_ptr_random);
 
 /* Maps a pointer to a 32 bit unique identifier. */
