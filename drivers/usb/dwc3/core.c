@@ -827,8 +827,13 @@ int dwc3_core_init(struct dwc3 *dwc)
 
 	if (!dwc->ulpi_ready) {
 		ret = dwc3_core_ulpi_init(dwc);
-		if (ret)
+		if (ret) {
+			if (ret == -ETIMEDOUT) {
+				dwc3_core_soft_reset(dwc);
+				ret = -EPROBE_DEFER;
+			}
 			goto err0;
+		}
 		dwc->ulpi_ready = true;
 	}
 
@@ -1357,6 +1362,7 @@ static int dwc3_probe(struct platform_device *pdev)
 		}
 	}
 
+#ifdef CONFIG_IPC_LOGGING
 	dwc->dwc_ipc_log_ctxt = ipc_log_context_create(NUM_LOG_PAGES,
 					dev_name(dwc->dev), 0);
 	if (!dwc->dwc_ipc_log_ctxt)
@@ -1368,17 +1374,23 @@ static int dwc3_probe(struct platform_device *pdev)
 						dma_ipc_log_ctx_name, 0);
 	if (!dwc->dwc_dma_ipc_log_ctxt)
 		dev_err(dwc->dev, "Error getting ipc_log_ctxt for ep_events\n");
+#endif
 
 	dwc3_instance[count] = dwc;
 	dwc->index = count;
 	count++;
 
 	pm_runtime_allow(dev);
+#ifdef CONFIG_DEBUG_FS
 	dwc3_debugfs_init(dwc);
+
+	pm_runtime_put(dev);
+
+	dma_set_max_seg_size(dev, UINT_MAX);
+#endif
+
 	return 0;
 
-err5:
-	dwc3_event_buffers_cleanup(dwc);
 
 	usb_phy_set_suspend(dwc->usb2_phy, 1);
 	usb_phy_set_suspend(dwc->usb3_phy, 1);
@@ -1392,11 +1404,9 @@ err5:
 
 	dwc3_ulpi_exit(dwc);
 
-err4:
-	dwc3_free_scratch_buffers(dwc);
-
 err3:
 	dwc3_free_scratch_buffers(dwc);
+
 err2:
 	dwc3_free_event_buffers(dwc);
 
@@ -1425,21 +1435,19 @@ static int dwc3_remove(struct platform_device *pdev)
 	 * memory region the next time probe is called.
 	 */
 	res->start -= DWC3_GLOBALS_REGS_START;
-
+#ifdef CONFIG_DEBUG_FS
 	dwc3_debugfs_exit(dwc);
+#endif
 	dwc3_gadget_exit(dwc);
 	pm_runtime_allow(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
-	pm_runtime_put_noidle(&pdev->dev);
-	pm_runtime_set_suspended(&pdev->dev);
 
 	dwc3_free_event_buffers(dwc);
 	dwc3_free_scratch_buffers(dwc);
-
+#ifdef CONFIG_IPC_LOGGING
 	ipc_log_context_destroy(dwc->dwc_ipc_log_ctxt);
 	dwc->dwc_ipc_log_ctxt = NULL;
-	ipc_log_context_destroy(dwc->dwc_dma_ipc_log_ctxt);
-	dwc->dwc_dma_ipc_log_ctxt = NULL;
+#endif
 	count--;
 	dwc3_instance[dwc->index] = NULL;
 
