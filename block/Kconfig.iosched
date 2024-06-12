@@ -7,16 +7,6 @@ config IOSCHED_NOOP
 	bool
 	default y
 
-
-config IOSCHED_DEADLINE
-	tristate "Deadline I/O scheduler"
-	default y
-	---help---
-	  The deadline I/O scheduler is simple and compact. It will provide
-	  CSCAN service with FIFO expiration of requests, switching to
-	  a new point in the service tree and doing a batch of IO from there
-	  in case of expiry.
-
 config IOSCHED_CFQ
 	tristate "CFQ I/O scheduler"
 	default y
@@ -42,14 +32,6 @@ config IOSCHED_ZEN
 	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
 	  Should work best with devices where there is no travel delay.
 
-config IOSCHED_ANXIETY
-	tristate "Anxiety I/O scheduler"
-	default n
-	---help---
-	  The Anxiety I/O scheduler prioritizes latency over everything
-	  else. When a request comes in, it will use a lighweight
-	  selection algorithm to swiftly process the current pending task.
-
 choice
 
 	prompt "Default I/O scheduler"
@@ -57,9 +39,6 @@ choice
 	help
 	  Select the I/O scheduler which will be used by default for all
 	  block devices.
-
-	config DEFAULT_DEADLINE
-		bool "Deadline" if IOSCHED_DEADLINE=y
 
 	config DEFAULT_CFQ
 		bool "CFQ" if IOSCHED_CFQ=y
@@ -70,27 +49,13 @@ choice
 	config DEFAULT_ZEN
 		bool "ZEN" if IOSCHED_ZEN=y
 
-	config DEFAULT_ANXIETY
-		bool "Anxiety" if IOSCHED_ANXIETY=y
-
 endchoice
 
 config DEFAULT_IOSCHED
 	string
-	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
 	default "noop" if DEFAULT_NOOP
 	default "zen" if DEFAULT_ZEN
-
-	default "zen" if DEFAULT_ZEN
-	default "anxiety" if DEFAULT_ANXIETY
-
-
-config MQ_IOSCHED_DEADLINE
-	tristate "MQ deadline I/O scheduler"
-	default y
-	---help---
-	  MQ version of the deadline IO scheduler.
 
 config MQ_IOSCHED_KYBER
 	tristate "Kyber I/O scheduler"
