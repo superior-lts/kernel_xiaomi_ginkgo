@@ -35,14 +35,12 @@ config CFQ_GROUP_IOSCHED
 	---help---
 	  Enable group IO scheduling in CFQ.
 
-
 config IOSCHED_ZEN
 	tristate "Zen I/O scheduler"
 	default y
 	---help---
 	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
 	  Should work best with devices where there is no travel delay.
-
 
 config IOSCHED_ANXIETY
 	tristate "Anxiety I/O scheduler"
@@ -66,9 +64,6 @@ choice
 	config DEFAULT_CFQ
 		bool "CFQ" if IOSCHED_CFQ=y
 
-	config DEFAULT_ANXIETY
-		bool "Anxiety" if IOSCHED_ANXIETY=y
-
 	config DEFAULT_NOOP
 		bool "No-op"
 
@@ -84,7 +79,6 @@ config DEFAULT_IOSCHED
 	string
 	default "deadline" if DEFAULT_DEADLINE
 	default "cfq" if DEFAULT_CFQ
-	default "anxiety" if DEFAULT_ANXIETY
 	default "noop" if DEFAULT_NOOP
 	default "zen" if DEFAULT_ZEN
 
