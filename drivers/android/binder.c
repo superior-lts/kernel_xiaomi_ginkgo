@@ -840,6 +840,7 @@ binder_enqueue_deferred_thread_work_ilocked(struct binder_thread *thread,
 					    struct binder_work *work)
 {
 	WARN_ON(!list_empty(&thread->waiting_thread_node));
+
 	binder_enqueue_work_ilocked(work, &thread->todo);
 }
 
@@ -857,8 +858,10 @@ static void
 binder_enqueue_thread_work_ilocked(struct binder_thread *thread,
 				   struct binder_work *work)
 {
+
 	WARN_ON(!list_empty(&thread->waiting_thread_node));
 	binder_enqueue_work_ilocked(work, &thread->todo);
+
 	thread->process_todo = true;
 }
 
@@ -1400,6 +1403,7 @@ static int binder_inc_node_nilocked(struct binder_node *node, int strong,
 			struct binder_thread *thread = container_of(target_list,
 						    struct binder_thread, todo);
 			binder_dequeue_work_ilocked(&node->work);
+
 			BUG_ON(&thread->todo != target_list);
 			binder_enqueue_deferred_thread_work_ilocked(thread,
 								   &node->work);
@@ -2895,6 +2899,7 @@ static bool binder_proc_transaction(struct binder_transaction *t,
 
 	if (!thread && !pending_async)
 		thread = binder_select_thread_ilocked(proc);
+
 
 	if (thread) {
 		binder_transaction_priority(thread->task, t, node_prio,

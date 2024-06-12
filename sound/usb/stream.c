@@ -294,6 +294,7 @@ static struct snd_pcm_chmap_elem *convert_chmap(int channels, unsigned int bits,
 
 	chmap->channels = channels;
 
+
 	if (protocol == UAC_VERSION_3) {
 		switch (channels) {
 		case 1:
@@ -303,6 +304,7 @@ static struct snd_pcm_chmap_elem *convert_chmap(int channels, unsigned int bits,
 			chmap->map[0] = SNDRV_CHMAP_FL;
 			chmap->map[1] = SNDRV_CHMAP_FR;
 			break;
+
 		}
 	} else {
 		int c = 0;

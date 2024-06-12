@@ -51,11 +51,12 @@ static int ashmem_open(struct inode *inode, struct file *file)
 	int ret;
 
 	ret = generic_file_open(inode, file);
-	if (unlikely(ret))
+	if (ret)
 		return ret;
 
 	asma = kmem_cache_alloc(ashmem_area_cachep, GFP_KERNEL);
 	if (unlikely(!asma))
+
 		return -ENOMEM;
 
 	*asma = (typeof(*asma)){
@@ -241,6 +242,7 @@ static int ashmem_mmap(struct file *file, struct vm_area_struct *vma)
 static int set_prot_mask(struct ashmem_area *asma, unsigned long prot)
 {
 	/* the user can only remove, not add, protection bits */
+
 	if (unlikely((READ_ONCE(asma->prot_mask) & prot) != prot))
 		return -EINVAL;
 
@@ -250,6 +252,7 @@ static int set_prot_mask(struct ashmem_area *asma, unsigned long prot)
 
 	WRITE_ONCE(asma->prot_mask, prot);
 	return 0;
+
 }
 
 static long ashmem_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
