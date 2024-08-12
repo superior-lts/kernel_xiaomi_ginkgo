@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/version.h>
 #include <linux/slab.h>
+#include <linux/touchpaint.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 10, 0)
 #include <uapi/linux/sched/types.h>
@@ -264,7 +265,7 @@ static void stop_box_thread(void)
 	box_thread = NULL;
 }
 
-static void touchpaint_finger_down(int slot)
+void touchpaint_finger_down(int slot)
 {
 	if (!init_done || finger_down[slot])
 		return;
@@ -300,7 +301,7 @@ static void touchpaint_finger_down(int slot)
 	}
 }
 
-static void touchpaint_finger_up(int slot)
+void touchpaint_finger_up(int slot)
 {
 	if (!init_done || !finger_down[slot])
 		return;
@@ -356,7 +357,7 @@ static void draw_line(int x1, int y1, int x2, int y2, u8 r, u8 g, u8 b)
 	}
 }
 
-static void touchpaint_finger_point(int slot, int x, int y)
+void touchpaint_finger_point(int slot, int x, int y)
 {
 	if (!init_done || !finger_down[slot])
 		return;
