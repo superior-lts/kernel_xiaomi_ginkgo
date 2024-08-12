@@ -203,6 +203,8 @@ static int box_thread_func(void *data)
 		if (y > fb_height - (fb_height / 12) || y < fb_height / 12)
 			step *= -1;
 
+		y += step;
+
 		/* Draw damage rather than redrawing the entire box */
 		for (off_y = 0; off_y < abs(step); off_y++) {
 			if (step < 0) {
@@ -216,7 +218,6 @@ static int box_thread_func(void *data)
 			}
 		}
 
-		y += step;
 		usleep_range(8000, 8000);
 	}
 
