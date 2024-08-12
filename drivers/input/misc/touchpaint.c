@@ -240,8 +240,10 @@ static int box_thread_func(void *data)
 
 static void start_box_thread(void)
 {
-	if (box_thread)
+	if (box_thread) {
+		pr_warn("tried to start duplicate box thread!\n");
 		return;
+	}
 
 	box_thread = kthread_run(box_thread_func, NULL, "touchpaint_box");
 	if (IS_ERR(box_thread)) {
@@ -252,12 +254,7 @@ static void start_box_thread(void)
 
 static void stop_box_thread(void)
 {
-	int ret;
-
-	if (!box_thread)
-		return;
-
-	ret = kthread_stop(box_thread);
+	int ret = kthread_stop(box_thread);
 	if (ret)
 		pr_err("failed to stop box thread! err=%d\n", ret);
 
