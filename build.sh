@@ -64,7 +64,6 @@ curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/se
 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
 git apply KernelSU-hook.patch
 sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/g' arch/arm64/configs/vendor/ginkgo-perf_defconfig
-sed -i 's/CONFIG_LOCALVERSION="-Venom"/CONFIG_LOCALVERSION="-Venom-KSU"/g' arch/arm64/configs/vendor/ginkgo-perf_defconfig
 else
 echo -e "\nKSU not Support, let's Skip\n"
 fi
