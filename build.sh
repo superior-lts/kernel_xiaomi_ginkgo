@@ -28,7 +28,7 @@ export LOCALVERSION
 
 if ! [ -d "${CLANG_DIR}" ]; then
 echo "Clang not found! Cloning to ${TC_DIR}..."
-if ! git clone --depth=1 -b main https://gitea.com/k4ngcaribug/aosp-clang ${CLANG_DIR}; then
+if ! git clone --depth=1 -b 17 https://gitlab.com/nekoprjkt/aosp-clang ${CLANG_DIR}; then
 echo "Cloning failed! Aborting..."
 exit 1
 fi
