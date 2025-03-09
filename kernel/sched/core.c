@@ -2407,7 +2407,6 @@ int wake_up_state(struct task_struct *p, unsigned int state)
 }
 
 #ifdef CONFIG_SCHED_BORE
-extern bool sched_bore;
 extern u8   sched_burst_fork_atavistic;
 extern uint sched_burst_cache_lifetime;
 
@@ -2533,7 +2532,7 @@ static inline void inherit_burst(struct task_struct *p) {
 }
 
 static void sched_post_fork_bore(struct task_struct *p) {
-	if (p->sched_class == &fair_sched_class && likely(sched_bore))
+	if (p->sched_class == &fair_sched_class)
 		inherit_burst(p);
 	p->se.burst_penalty = p->se.prev_burst_penalty;
 }
@@ -2560,9 +2559,10 @@ static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 	p->boost_expires        = 0;
 	p->boost_period         = 0;
 
-#ifdef CONFIG_SCHED_BORE
+	#ifdef CONFIG_SCHED_BORE
 	sched_fork_bore(p);
-#endif // CONFIG_SCHED_BORE
+	#endif // CONFIG_SCHED_BORE
+
 	INIT_LIST_HEAD(&p->se.group_node);
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
@@ -6753,12 +6753,10 @@ void __init sched_init(void)
 	unsigned long alloc_size = 0, ptr;
 
 	sched_clock_init();
-	
-#ifdef CONFIG_SCHED_BORE
+	#ifdef CONFIG_SCHED_BORE
 	sched_init_bore();
-	printk(KERN_INFO "BORE (Burst-Oriented Response Enhancer) CPU Scheduler modification 4.2.4 by Masahito Suzuki");
-#endif // CONFIG_SCHED_BORE
-
+	printk(KERN_INFO "BORE (Burst-Oriented Response Enhancer) CPU Scheduler modification 5.1.0 by Masahito Suzuki");
+	#endif // CONFIG_SCHED_BORE
 	wait_bit_init();
 
 	init_clusters();
