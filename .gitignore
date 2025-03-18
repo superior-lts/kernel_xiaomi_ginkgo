@@ -131,11 +131,9 @@ Android.bp
 
 # Ignore local folders
 AnyKernel3/
-clang/
-gcc64/
-gcc32/
 out/
+*.zip
 
 # Ignore KernelSU folders
-KernelSU/
+KernelSU-Next/
 drivers/kernelsu
